@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEO Page Guard — Sitemap 质量审计</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="header__brand">
+        <div class="header__logo" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="8" fill="url(#g)"/>
+            <path d="M8 18V10h3.2c2.1 0 3.4 1.1 3.4 2.8 0 1.2-.6 2.1-1.6 2.5L15.5 18H12l-1.1-2.2H11V18H8zm3-4.5h.5c.8 0 1.2-.4 1.2-1s-.4-1-1.2-1H11v2zm6.5 4.5v-8H21v8h-3.5z" fill="#fff"/>
+            <defs><linearGradient id="g" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs>
+          </svg>
+        </div>
+        <div>
+          <h1 class="header__title">SEO Page Guard</h1>
+          <p class="header__subtitle">传入 Sitemap，自动审计页面 SEO 内容质量</p>
+        </div>
+      </div>
+      <div class="header__badge">独立工具 · v1.0</div>
+    </header>
+
+    <section class="panel panel--form">
+      <form id="audit-form" class="form">
+        <div class="form__row">
+          <label class="form__label" for="sitemap-url">Sitemap 链接</label>
+          <input
+            id="sitemap-url"
+            class="form__input"
+            type="url"
+            name="sitemapUrl"
+            placeholder="https://example.com/sitemap.xml"
+            required
+            autocomplete="url"
+          />
+        </div>
+        <div class="form__grid">
+          <div class="form__field">
+            <label class="form__label" for="concurrency">并发数</label>
+            <input id="concurrency" class="form__input form__input--sm" type="number" name="concurrency" value="5" min="1" max="20" />
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="max-urls">最大 URL 数</label>
+            <input id="max-urls" class="form__input form__input--sm" type="number" name="maxUrls" placeholder="不限" min="1" />
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="timeout">超时 (ms)</label>
+            <input id="timeout" class="form__input form__input--sm" type="number" name="timeout" value="12000" min="3000" max="60000" step="1000" />
+          </div>
+        </div>
+        <div class="form__actions">
+          <button id="submit-btn" class="btn btn--primary" type="submit">
+            <span class="btn__icon" aria-hidden="true">▶</span>
+            开始审计
+          </button>
+          <button id="cancel-btn" class="btn btn--ghost" type="button" hidden>停止</button>
+        </div>
+      </form>
+
+      <div id="rules-hint" class="rules-hint">
+        <span class="rules-hint__label">检测项</span>
+        <span class="tag">Title</span>
+        <span class="tag">Description</span>
+        <span class="tag">Canonical</span>
+        <span class="tag">H1</span>
+        <span class="tag">白屏检测</span>
+        <span class="tag">Soft-404</span>
+      </div>
+    </section>
+
+    <section id="progress-section" class="panel panel--progress" hidden>
+      <div class="progress-header">
+        <span id="progress-label" class="progress-label">正在加载 Sitemap…</span>
+        <span id="progress-count" class="progress-count">0 / 0</span>
+      </div>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-bar__fill" style="width: 0%"></div>
+      </div>
+      <p id="progress-url" class="progress-url"></p>
+    </section>
+
+    <section id="summary-section" class="summary" hidden>
+      <div class="summary__card summary__card--total">
+        <span class="summary__value" id="stat-total">0</span>
+        <span class="summary__label">已检测</span>
+      </div>
+      <div class="summary__card summary__card--pass">
+        <span class="summary__value" id="stat-passed">0</span>
+        <span class="summary__label">通过</span>
+      </div>
+      <div class="summary__card summary__card--fail">
+        <span class="summary__value" id="stat-failed">0</span>
+        <span class="summary__label">未通过</span>
+      </div>
+      <div class="summary__card summary__card--warn">
+        <span class="summary__value" id="stat-warnings">0</span>
+        <span class="summary__label">警告</span>
+      </div>
+    </section>
+
+    <section id="filter-section" class="panel panel--filter" hidden>
+      <div class="filter-bar">
+        <button class="filter-btn filter-btn--active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="failed">仅问题页</button>
+        <button class="filter-btn" data-filter="passed">仅通过</button>
+        <button id="export-btn" class="btn btn--ghost btn--sm">导出 JSON</button>
+      </div>
+    </section>
+
+    <section id="results-section" class="results" hidden>
+      <div id="results-list" class="results__list"></div>
+    </section>
+
+    <div id="empty-state" class="empty-state">
+      <div class="empty-state__icon" aria-hidden="true">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+          <path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+        </svg>
+      </div>
+      <p class="empty-state__text">输入 Sitemap 链接，点击「开始审计」查看每个页面的 SEO 质量报告</p>
+    </div>
+  </div>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
