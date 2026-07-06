@@ -26,6 +26,16 @@ let lastReport = null;
 /** @type {string} */
 let activeFilter = 'all';
 
+const CATEGORY_LABELS = {
+  core: '核心 SEO',
+  safety: '安全卡点',
+  semantic: '语义合规',
+  'smart-search': '智能搜索',
+  social: '社交传播',
+  'link-health': '链路健康',
+  accessibility: '无障碍',
+};
+
 const RULE_LABELS = {
   'title.missing': 'Title',
   'title.forbidden': 'Title',
@@ -39,6 +49,18 @@ const RULE_LABELS = {
   'h1.multiple': 'H1',
   'body.thin': '白屏',
   'http.error': 'HTTP',
+  'anchor.empty': 'Anchor',
+  'anchor.hash': 'Anchor',
+  'anchor.javascript': 'Anchor',
+  'image.alt.coverage': 'img alt',
+  'image.alt.partial': 'img alt',
+  'robots.noindex': 'noindex',
+  'html.lang.missing': 'html lang',
+  'html.lang.mismatch': 'html lang',
+  'jsonld.missing': 'JSON-LD',
+  'jsonld.invalid': 'JSON-LD',
+  'og.title.missing': 'og:title',
+  'og.image.missing': 'og:image',
 };
 
 form.addEventListener('submit', async (e) => {
@@ -212,7 +234,7 @@ function renderCard(result) {
           <span class="issue-badge issue-badge--${issue.level}">${issue.level}</span>
           <div>
             <span class="issue-text">${esc(issue.message)}</span>
-            <span class="issue-actual">${RULE_LABELS[issue.ruleId] ?? issue.ruleId}${issue.actual ? ` · ${esc(issue.actual)}` : ''}</span>
+            <span class="issue-actual">${CATEGORY_LABELS[issue.category] ?? issue.category} · ${RULE_LABELS[issue.ruleId] ?? issue.ruleId}${issue.actual ? ` · ${esc(issue.actual)}` : ''}</span>
           </div>
         </li>
       `).join('');
@@ -238,6 +260,10 @@ function renderCard(result) {
           <div class="metric"><div class="metric__label">Desc 长度</div><div class="metric__value">${m.descriptionLength ?? 0}</div></div>
           <div class="metric"><div class="metric__label">H1 数量</div><div class="metric__value">${m.h1Count ?? 0}</div></div>
           <div class="metric"><div class="metric__label">正文长度</div><div class="metric__value">${m.bodyTextLength ?? 0}</div></div>
+          <div class="metric"><div class="metric__label">无效链接</div><div class="metric__value">${m.anchorBadCount ?? 0}/${m.anchorTotal ?? 0}</div></div>
+          <div class="metric"><div class="metric__label">alt 覆盖率</div><div class="metric__value">${m.imageTotal ? Math.round((m.imageAltCoverage ?? 1) * 100) + '%' : '—'}</div></div>
+          <div class="metric"><div class="metric__label">html lang</div><div class="metric__value">${esc(m.htmlLang || '—')}</div></div>
+          <div class="metric"><div class="metric__label">JSON-LD / OG</div><div class="metric__value">${m.hasJsonLd ? '✓' : '✗'} / ${m.hasOgTitle && m.hasOgImage ? '✓' : '✗'}</div></div>
         </div>
       </div>
     </article>

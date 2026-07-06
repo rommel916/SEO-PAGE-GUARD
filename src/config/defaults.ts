@@ -1,4 +1,4 @@
-import type { AuditRules } from './types.js';
+import type { AuditRules } from '../engine/types.js';
 
 export const DEFAULT_RULES: AuditRules = {
   minBodyTextLength: 150,
@@ -8,6 +8,13 @@ export const DEFAULT_RULES: AuditRules = {
   requireCanonical: true,
   requireH1: true,
   canonicalMustMatchUrl: false,
+  checkAnchorHealth: true,
+  minImageAltCoverageRatio: 1,
+  forbidNoindex: true,
+  requireHtmlLang: true,
+  expectedLang: null,
+  requireJsonLd: true,
+  requireOgTags: true,
 };
 
 export const DEFAULT_AUDIT_OPTIONS = {
